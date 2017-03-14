@@ -6,7 +6,7 @@
     "author": "Konstantin Kostov <me@kvkostov.eu>",
     "license": "MIT",
     "scripts": {
-      "twit-followers": "node --use_strict --harmony --es_staging ./src/twit-followers.js"
+        "twit-followers": "node -r dotenv/config --use_strict --harmony --es_staging ./src/twit-followers.js"
     },
     "engines": {
         "node": "7.6.0",
@@ -14,7 +14,9 @@
         "yarn": "0.21.3"
     },
     "dependencies": {
-        "node-fetch": "^1.6.3"
+        "debug": "^2.6.3",
+        "node-fetch": "^1.6.3",
+        "twitter": "^1.7.0"
     },
     "eslintConfig": {
         "env": {
@@ -29,7 +31,14 @@
             "experimentalObjectRestSpread": true
         },
         "rules": {
-            "no-console": "off"
+            "no-console": "off",
+            "indent": [
+                "error",
+                2
+            ]
         }
+    },
+    "devDependencies": {
+        "dotenv": "^4.0.0"
     }
 }

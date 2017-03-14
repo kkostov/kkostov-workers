@@ -1,9 +1,11 @@
-const fetch = require('node-fetch')
+/** creates a snapshot of my twitter followers */
+const util = require('util');
+const debug = require('debug')('workers:twit-followers');
+const twitter = require('./common/twitterclient');
 
-fetch('https://jsonplaceholder.typicode.com/posts/1')
-  .then(response => {
-    response.json()
-      .then(data => console.log({json: data}))
-      .catch(err => console.error(`error deserializing json: ${err}`))
-  })
-  .catch(err => console.error(`fetch failed: ${err}`))
+twitter.getFollowersForUser("kkostov", (err, followers) => {
+  if (err) {
+    debug(`failed to load followers: ${util.inspect(err, false, null)}`)
+  }
+  debug(`found ${followers.length} followers`)
+})
