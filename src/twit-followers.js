@@ -7,7 +7,9 @@ const azure = require('./common/azuretables');
 twitter.getFollowersForUser("kkostov", (err, followers) => {
   if (err) {
     debug(`failed to load followers: ${util.inspect(err, false, null)}`)
+    throw err;
   }
+
   debug(`found ${followers.length} followers`)
   const formattedFollowers = followers.map(user => {
     return {
@@ -23,11 +25,11 @@ twitter.getFollowersForUser("kkostov", (err, followers) => {
     }
   })
   azure.createTable('twitfollowers', (error) => {
-    if(error) {
+    if (error) {
       debug(`failed to create azure storage table twitfollowers: ${error}`)
     } else {
       azure.addBatchToTable('twitfollowers', formattedFollowers, (error) => {
-        if(error) {
+        if (error) {
           debug(`failed to insert batch of followers in azure storage table twitfollowers: ${error}`)
         } else {
           debug(`followers inserted`)
