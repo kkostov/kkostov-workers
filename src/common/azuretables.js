@@ -1,5 +1,4 @@
 const azure = require('azure-storage');
-const debug = require('debug')('common:azuretables');
 
 /** Creates a table with the given if it doesn't already exist */
 const createTable = (tableName, callback) => {
@@ -39,8 +38,9 @@ const addBatchToTable = (tableName, items, callback) => {
   const entGen = azure.TableUtilities.entityGenerator;
   let batch = new azure.TableBatch();
   // azure supports a max of 100 operations per batch
-  const MAX_BATCH = 99;
+  const MAX_BATCH = 100;
   const nextBatch = items.splice(0, MAX_BATCH);
+
   const processBatch = (entities) => {
     for (const entity of entities) {
       let tableEntity = {};
@@ -63,7 +63,13 @@ const addBatchToTable = (tableName, items, callback) => {
         } else {
           // splice the next portion of items to process
           const next = items.splice(0, MAX_BATCH);
-          processBatch(next)
+          if(next.length > 0) {
+            batch.clear();
+            processBatch(next)
+          } else {
+            // no more items remaining
+            callback()
+          }
         }
       } else {
         callback(error)
