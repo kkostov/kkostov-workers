@@ -1,0 +1,20 @@
+machine:
+  node:
+    version: 7.6.0
+
+
+dependencies:
+    cache_directories:
+    - node_modules
+
+compile:
+    pre:
+    - npm prune && npm install
+    override:
+    - ls
+
+deployment:
+  production:
+    branch: master
+    commands:
+    - git push -f git@heroku.com:${CIRCLE_PROJECT_REPONAME}.git ${CIRCLE_BRANCH}:master

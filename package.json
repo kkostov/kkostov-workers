@@ -1,0 +1,35 @@
+{
+    "name": "kkostov-workers",
+    "version": "1.0.0",
+    "description": "Workers and microservices",
+    "main": "index.js",
+    "author": "Konstantin Kostov <me@kvkostov.eu>",
+    "license": "MIT",
+    "scripts": {
+      "twit-followers": "node --use_strict --harmony --es_staging ./src/twit-followers.js"
+    },
+    "engines": {
+        "node": "7.6.0",
+        "npm": "4.1.2",
+        "yarn": "0.21.3"
+    },
+    "dependencies": {
+        "node-fetch": "^1.6.3"
+    },
+    "eslintConfig": {
+        "env": {
+            "node": true,
+            "es6": true,
+            "jest": true
+        },
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "extends": "eslint:recommended",
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true
+        },
+        "rules": {
+            "no-console": "off"
+        }
+    }
+}
