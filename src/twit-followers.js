@@ -31,14 +31,15 @@ twitter.getFollowersForUser(screenName, (err, followers) => {
   azure.createTable(tableName, (error) => {
     if (error) {
       debug(`failed to create azure storage table ${tableName}: ${error}`)
-    } else {
-      azure.addBatchToTable(tableName, formattedFollowers, (error) => {
-        if (error) {
-          debug(`failed to insert batch of followers in azure storage table ${tableName}: ${error}`)
-        } else {
-          debug(`followers saved`)
-        }
-      })
+      throw error
     }
+
+    azure.addBatchToTable(tableName, formattedFollowers, (error) => {
+      if (error) {
+        debug(`failed to insert batch of followers in azure storage table ${tableName}: ${error}`)
+      } else {
+        debug(`followers saved`)
+      }
+    })
   })
 })

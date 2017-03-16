@@ -31,14 +31,15 @@ twitter.getFriendsForUser(screenName, (err, friends) => {
   azure.createTable(tableName, (error) => {
     if (error) {
       debug(`failed to create azure storage table ${tableName}: ${error}`)
-    } else {
-      azure.addBatchToTable(tableName, formattedFriends, (error) => {
-        if (error) {
-          debug(`failed to insert batch of friends in azure storage table ${tableName}: ${error}`)
-        } else {
-          debug(`friends saved`)
-        }
-      })
+      throw error;
     }
+    
+    azure.addBatchToTable(tableName, formattedFriends, (error) => {
+      if (error) {
+        debug(`failed to insert batch of friends in azure storage table ${tableName}: ${error}`)
+      } else {
+        debug(`friends saved`)
+      }
+    })
   })
 })
