@@ -81,9 +81,41 @@ const addBatchToTable = (tableName, items, callback) => {
   processBatch(nextBatch)
 }
 
+/** Downloads all entities from the specified partition */
+const getEntitiesFromPartition = (tableId, partitionId, selectFields, callback) => {
+  // todo: add retry policy filter
+  const tableSvc = azure.createTableService();
+  const query = new azure.TableQuery()
+    .select(selectFields)
+    .where('PartitionKey eq ?', partitionId);
+
+  // Azure uses a continuationToken for paging
+  const downloadResults = (continuationToken, lastPageData) => {
+    tableSvc.queryEntities(tableId, query, continuationToken, (error, result, response) => {
+      if(error) {
+        callback(error)
+      } else {
+        let pageOfEntities = result.entries;
+        if (lastPageData) {
+          pageOfEntities = pageOfEntities.concat(lastPageData)
+        }
+        if(result.continuationToken) {
+          // more data is available
+          downloadResults(result.continuationToken, pageOfEntities)
+        } else {
+          // done loading
+          callback(undefined, pageOfEntities)
+        }
+      }
+    })
+  }
+
+  downloadResults();
+}
 
 module.exports = {
   createTable,
   addEntityToTable,
-  addBatchToTable
+  addBatchToTable,
+  getEntitiesFromPartition
 }

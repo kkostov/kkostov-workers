@@ -16,6 +16,7 @@ twitter.getFollowersForUser(screenName, (err, followers) => {
     return {
       PartitionKey: `followers_${screenName}`,
       RowKey: `twitter_${user.id_str}`,
+      id: user.id_str,
       name: user.name,
       screen_name: user.screen_name,
       followers_count: user.followers_count,
