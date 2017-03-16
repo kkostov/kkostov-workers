@@ -36,6 +36,36 @@ const getFollowersForUser = (screenName, callback) => {
 }
 
 
+/** Returns a list of friends for the given screen name */
+const getFriendsForUser = (screenName, callback) => {
+
+  const getPagedFriends = (pageId, lastPageData) => client.get('friends/list', {
+    screen_name: screenName,
+    count: 200,
+    skip_status: true,
+    include_user_entities: true,
+    cursor: pageId
+  })
+  .then(data => {
+    let pageOfFriends = data["users"].slice()
+    if (lastPageData) {
+      pageOfFriends = pageOfFriends.concat(lastPageData)
+    }
+    if (data["next_cursor"] !== 0 && data["next_cursor"] !== "0") {
+      // there are more pages to fetch
+      getPagedFriends(data["next_cursor"], pageOfFriends)
+    } else {
+      // we have all followers
+      callback(undefined, pageOfFriends)
+    }
+  })
+  .catch(err => callback(err))
+
+  getPagedFriends(-1)
+}
+
+
 module.exports = {
-  getFollowersForUser
+  getFollowersForUser,
+  getFriendsForUser
 }
