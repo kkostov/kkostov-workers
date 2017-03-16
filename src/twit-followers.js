@@ -4,7 +4,8 @@ const debug = require('debug')('workers:twit-followers');
 const twitter = require('./common/twitterclient');
 const azure = require('./common/azuretables');
 
-twitter.getFollowersForUser("kkostov", (err, followers) => {
+const screenName = process.env.TWITTER_USER;
+twitter.getFollowersForUser(screenName, (err, followers) => {
   if (err) {
     debug(`failed to load followers: ${util.inspect(err, false, null)}`)
     throw err;
@@ -13,7 +14,7 @@ twitter.getFollowersForUser("kkostov", (err, followers) => {
   debug(`found ${followers.length} followers`)
   const formattedFollowers = followers.map(user => {
     return {
-      PartitionKey: "followers_kkostov",
+      PartitionKey: `followers_${screenName}`,
       RowKey: `twitter_${user.id_str}`,
       name: user.name,
       screen_name: user.screen_name,
@@ -24,15 +25,17 @@ twitter.getFollowersForUser("kkostov", (err, followers) => {
       favourites_count: user.favourites_count
     }
   })
-  azure.createTable('twitfollowers', (error) => {
+
+  const tableName = process.env.AZURE_TABLE_NAME;
+  azure.createTable(tableName, (error) => {
     if (error) {
-      debug(`failed to create azure storage table twitfollowers: ${error}`)
+      debug(`failed to create azure storage table ${tableName}: ${error}`)
     } else {
-      azure.addBatchToTable('twitfollowers', formattedFollowers, (error) => {
+      azure.addBatchToTable(tableName, formattedFollowers, (error) => {
         if (error) {
-          debug(`failed to insert batch of followers in azure storage table twitfollowers: ${error}`)
+          debug(`failed to insert batch of followers in azure storage table ${tableName}: ${error}`)
         } else {
-          debug(`followers inserted`)
+          debug(`followers saved`)
         }
       })
     }
