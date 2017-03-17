@@ -4,7 +4,7 @@ const azure = require('azure-storage');
 const createTable = (tableName, callback) => {
   // todo: add retry policy filter
   const tableSvc = azure.createTableService();
-  tableSvc.createTableIfNotExists(tableName, (error, result, response) => callback(error, result))
+  tableSvc.createTableIfNotExists(tableName, (error, result) => callback(error, result))
 }
 
 /** Adds a JSON object as an entity in a storage table */
@@ -21,7 +21,7 @@ const addEntityToTable = (tableName, entity, callback) => {
       tableEntity[prop] = entGen.String(`${entity[prop]}`)
     }
   }
-  tableSvc.insertOrReplaceEntity(tableName, tableEntity, function(error, result, response) {
+  tableSvc.insertOrReplaceEntity(tableName, tableEntity, function(error) {
     if (!error) {
       // Entity inserted
       callback()
@@ -54,7 +54,7 @@ const addBatchToTable = (tableName, items, callback) => {
         echoContent: false
       })
     }
-    tableSvc.executeBatch(tableName, batch, function(error, result, response) {
+    tableSvc.executeBatch(tableName, batch, function(error) {
       if (!error) {
         // operation successfull
         if(entities < MAX_BATCH) {
@@ -91,7 +91,7 @@ const getEntitiesFromPartition = (tableId, partitionId, selectFields, callback) 
 
   // Azure uses a continuationToken for paging
   const downloadResults = (continuationToken, lastPageData) => {
-    tableSvc.queryEntities(tableId, query, continuationToken, (error, result, response) => {
+    tableSvc.queryEntities(tableId, query, continuationToken, (error, result) => {
       if(error) {
         callback(error)
       } else {
