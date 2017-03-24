@@ -1,5 +1,4 @@
 /** calculates some stats based on followers and friends */
-const util = require('util');
 const debug = require('debug')('workers:twit-stats');
 const azure = require('./common/azuretables');
 
