@@ -50,7 +50,7 @@ const addBatchToTable = (tableName, items, callback) => {
           tableEntity[prop] = entGen.String(`${entity[prop]}`)
         }
       }
-      batch.insertOrReplaceEntity(tableEntity, {
+      batch.insertOrMergeEntity(tableEntity, {
         echoContent: false
       })
     }
