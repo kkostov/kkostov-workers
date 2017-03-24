@@ -12,11 +12,11 @@ twitter.getFriendsForUser(screenName, (err, friends) => {
   }
 
   debug(`found ${friends.length} friends`)
-  const formattedFriends = friends.map(user => {
+  const formattedFriends = friends.map(userId => {
     return {
       PartitionKey: `friends_${screenName}`,
-      RowKey: `twitter_${user.id_str}`,
-      id: user.id
+      RowKey: `twitter_${userId}`,
+      id: userId
     }
   })
 

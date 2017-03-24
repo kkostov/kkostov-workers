@@ -7,27 +7,26 @@ const client = new Twitter({
   access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET
 });
 
+
 /** Returns a list of followers for the given screen name */
 const getFollowersForUser = (screenName, callback) => {
 
-  const getPagedFollowers = (pageId, lastPageData) => client.get('followers/list', {
+  const getPagedFollowers = (pageId, lastPageData) => client.get('followers/ids', {
     screen_name: screenName,
-    count: 200,
-    skip_status: true,
-    include_user_entities: false,
+    count: 5000,
     cursor: pageId
   })
   .then(data => {
-    let pageOfFollowers = data["users"].slice()
+    let dataPage = data["ids"];
     if (lastPageData) {
-      pageOfFollowers = pageOfFollowers.concat(lastPageData)
+      dataPage = dataPage.concat(lastPageData)
     }
     if (data["next_cursor"] !== 0 && data["next_cursor"] !== "0") {
       // there are more pages to fetch
-      getPagedFollowers(data["next_cursor"], pageOfFollowers)
+      getPagedFollowers(data["next_cursor"], dataPage)
     } else {
       // we have all followers
-      callback(undefined, pageOfFollowers)
+      callback(undefined, dataPage)
     }
   })
   .catch(err => callback(err))
@@ -39,24 +38,22 @@ const getFollowersForUser = (screenName, callback) => {
 /** Returns a list of friends for the given screen name */
 const getFriendsForUser = (screenName, callback) => {
 
-  const getPagedFriends = (pageId, lastPageData) => client.get('friends/list', {
+  const getPagedFriends = (pageId, lastPageData) => client.get('friends/ids', {
     screen_name: screenName,
-    count: 200,
-    skip_status: true,
-    include_user_entities: false,
+    count: 5000,
     cursor: pageId
   })
   .then(data => {
-    let pageOfFriends = data["users"].slice()
+    let dataPage = data["ids"];
     if (lastPageData) {
-      pageOfFriends = pageOfFriends.concat(lastPageData)
+      dataPage = dataPage.concat(lastPageData)
     }
     if (data["next_cursor"] !== 0 && data["next_cursor"] !== "0") {
       // there are more pages to fetch
-      getPagedFriends(data["next_cursor"], pageOfFriends)
+      getPagedFriends(data["next_cursor"], dataPage)
     } else {
       // we have all followers
-      callback(undefined, pageOfFriends)
+      callback(undefined, dataPage)
     }
   })
   .catch(err => callback(err))

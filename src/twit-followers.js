@@ -12,11 +12,11 @@ twitter.getFollowersForUser(screenName, (err, followers) => {
   }
 
   debug(`found ${followers.length} followers`)
-  const formattedFollowers = followers.map(user => {
+  const formattedFollowers = followers.map(userId => {
     return {
       PartitionKey: `followers_${screenName}`,
-      RowKey: `twitter_${user.id_str}`,
-      id: user.id
+      RowKey: `twitter_${userId}`,
+      id: userId
     }
   })
 
