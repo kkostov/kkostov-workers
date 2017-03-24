@@ -17,8 +17,16 @@ const addEntityToTable = (tableName, entity, callback) => {
   let tableEntity = {};
   for (const prop in entity) {
     if (entity.hasOwnProperty(prop)) {
-      // todo: check the real type of the value instead of forcing String
-      tableEntity[prop] = entGen.String(`${entity[prop]}`)
+      switch (typeof entity[prop]) {
+      case 'boolean':
+        tableEntity[prop] = entGen.Boolean(entity[prop]);
+        break;
+      case 'number':
+        tableEntity[prop] = entGen.Int64(entity[prop]);
+        break;
+      default:
+        tableEntity[prop] = entGen.String(`${entity[prop]}`);
+      }
     }
   }
   tableSvc.insertOrReplaceEntity(tableName, tableEntity, function(error) {
@@ -57,13 +65,13 @@ const addBatchToTable = (tableName, items, callback) => {
     tableSvc.executeBatch(tableName, batch, function(error) {
       if (!error) {
         // operation successfull
-        if(entities < MAX_BATCH) {
+        if (entities < MAX_BATCH) {
           // no more items remaining
           callback()
         } else {
           // splice the next portion of items to process
           const next = items.splice(0, MAX_BATCH);
-          if(next.length > 0) {
+          if (next.length > 0) {
             batch.clear();
             processBatch(next)
           } else {
@@ -92,14 +100,14 @@ const getEntitiesFromPartition = (tableId, partitionId, selectFields, callback) 
   // Azure uses a continuationToken for paging
   const downloadResults = (continuationToken, lastPageData) => {
     tableSvc.queryEntities(tableId, query, continuationToken, (error, result) => {
-      if(error) {
+      if (error) {
         callback(error)
       } else {
         let pageOfEntities = result.entries;
         if (lastPageData) {
           pageOfEntities = pageOfEntities.concat(lastPageData)
         }
-        if(result.continuationToken) {
+        if (result.continuationToken) {
           // more data is available
           downloadResults(result.continuationToken, pageOfEntities)
         } else {
