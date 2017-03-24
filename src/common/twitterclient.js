@@ -14,7 +14,7 @@ const getFollowersForUser = (screenName, callback) => {
     screen_name: screenName,
     count: 200,
     skip_status: true,
-    include_user_entities: true,
+    include_user_entities: false,
     cursor: pageId
   })
   .then(data => {
@@ -43,7 +43,7 @@ const getFriendsForUser = (screenName, callback) => {
     screen_name: screenName,
     count: 200,
     skip_status: true,
-    include_user_entities: true,
+    include_user_entities: false,
     cursor: pageId
   })
   .then(data => {
