@@ -8,6 +8,7 @@
     "scripts": {
         "twit-followers": "node -r dotenv/config --use_strict --harmony --es_staging ./src/twit-followers.js",
         "twit-friends": "node -r dotenv/config --use_strict --harmony --es_staging ./src/twit-friends.js",
+        "twit-stream": "node -r dotenv/config --use_strict --harmony --es_staging ./src/twit-stream.js",
         "twit-diffusers": "node -r dotenv/config --use_strict --harmony --es_staging ./src/twit-diffusers.js"
     },
     "engines": {
