@@ -11,12 +11,15 @@ twitter.getFriendsForUser(screenName, (err, friends) => {
     throw err;
   }
 
+  const partitionKey = `friends_${screenName}`;
+
   debug(`found ${friends.length} friends`)
   const formattedFriends = friends.map(userId => {
     return {
-      PartitionKey: `friends_${screenName}`,
+      PartitionKey: partitionKey,
       RowKey: `twitter_${userId}`,
-      id: userId
+      id: userId,
+      archived: false
     }
   })
 
@@ -27,12 +30,31 @@ twitter.getFriendsForUser(screenName, (err, friends) => {
       throw error;
     }
 
-    azure.addBatchToTable(tableName, formattedFriends, (error) => {
+    azure.getEntitiesFromPartition(tableName, partitionKey, ['id'], (error, data) => {
       if (error) {
-        debug(`failed to insert batch of friends in azure storage table ${tableName}: ${error}`)
-      } else {
-        debug(`friends saved`)
+        debug(`failed to get friends from azure storage table ${tableName}: ${error}`)
+        throw error
       }
-    })
-  })
-})
+
+      for (let old_friend of data) {
+        if (!formattedFriends.find(ff => `${ff.id}` === old_friend.id._)) {
+          // the user is no longer a follower
+          formattedFriends.push({
+            PartitionKey: partitionKey,
+            RowKey: `twitter_${old_friend.id._}`,
+            id: old_friend.id._,
+            archived: true
+          });
+        }
+      }
+
+      azure.addBatchToTable(tableName, formattedFriends, (error) => {
+        if (error) {
+          debug(`failed to insert batch of friends in azure storage table ${tableName}: ${error}`)
+        } else {
+          debug(`friends saved`)
+        }
+      });
+    });
+  });
+});
