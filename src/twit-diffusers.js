@@ -54,7 +54,8 @@ azure.createTable(tableName, (error) => {
               id: twitterUser,
               unfollower: true,
               fan: false,
-              archived: false
+              archived: false, // not scheduled for removal
+              seen: false // new unfollower, the user hasn't dismissed it yet
             }
           });
         debug(`found ${unfollowers.length} unfollowers`);
@@ -69,7 +70,8 @@ azure.createTable(tableName, (error) => {
               id: twitterUser,
               unfollower: false,
               fan: true,
-              archived: false
+              archived: false,
+              seen: false // new unfollower, the user hasn't dismissed it yet
             }
           });
         debug(`found ${fans.length} fans`);
