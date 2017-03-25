@@ -4,38 +4,21 @@ const debug = require('debug')('workers:twit-followers');
 const twitter = require('./common/twitterclient');
 const azure = require('./common/azuretables');
 
-const screenName = process.env.TWITTER_USER;
-twitter.getFollowersForUser(screenName, (err, followers) => {
-  if (err) {
-    debug(`failed to load followers: ${util.inspect(err, false, null)}`)
-    throw err;
-  }
-  const partitionKey = `followers_${screenName}`;
+const putFollowersToStorage = (userId, followers, tableName) => {
+  const partitionKey = `followers_${userId}`;
+  let formattedFollowers = followers
+    .map(userId => {
+      return {
+        PartitionKey: partitionKey,
+        RowKey: `twitter_${userId}`,
+        id: userId,
+        archived: false
+      };
+    });
 
-  debug(`found ${followers.length} followers`)
-  let formattedFollowers = followers.map(userId => {
-    return {
-      PartitionKey: partitionKey,
-      RowKey: `twitter_${userId}`,
-      id: userId,
-      archived: false
-    }
-  })
-
-  const tableName = process.env.AZURE_TABLE_NAME;
-  azure.createTable(tableName, (error) => {
-    if (error) {
-      debug(`failed to create azure storage table ${tableName}: ${error}`)
-      throw error
-    }
-
-    azure.getEntitiesFromPartition(tableName, partitionKey, ['id'], (error, data) => {
-      if (error) {
-        debug(`failed to get followers from azure storage table ${tableName}: ${error}`)
-        throw error
-      }
-
-      for (let old_follower of data) {
+  return azure.getEntitiesFromPartition(tableName, partitionKey, ['id'])
+    .then(data => {
+      data.forEach(old_follower => {
         if (!formattedFollowers.find(ff => `${ff.id}` === old_follower.id._)) {
           // the user is no longer a follower
           formattedFollowers.push({
@@ -45,15 +28,19 @@ twitter.getFollowersForUser(screenName, (err, followers) => {
             archived: true
           });
         }
-      }
+      })
+    }).then(() => azure.addBatchToTable(tableName, formattedFollowers));
+}
 
-      azure.addBatchToTable(tableName, formattedFollowers, (error) => {
-        if (error) {
-          debug(`failed to insert batch of followers in azure storage table ${tableName}: ${error}`)
-        } else {
-          debug(`followers saved`)
-        }
-      });
+const syncFollowers = (userId, tableName) => {
+  return twitter.getFollowerIds(userId)
+    .then(followers => putFollowersToStorage(userId, followers, tableName))
+    .catch(error => {
+      debug(`failed to load followers: ${util.inspect(error, false, null)}`)
+      throw error;
     });
-  });
-});
+}
+
+module.exports = {
+  syncFollowers
+}

@@ -1,5 +1,4 @@
 const Twitter = require('twitter');
-
 const Promise = require('bluebird').Promise;
 
 const client = new Twitter({
