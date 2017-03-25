@@ -18,6 +18,7 @@
     },
     "dependencies": {
         "azure-storage": "^2.1.0",
+        "bluebird": "^3.5.0",
         "debug": "^2.6.3",
         "node-fetch": "^1.6.3",
         "twitter": "^1.7.0"
